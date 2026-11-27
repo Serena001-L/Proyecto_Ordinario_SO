@@ -96,6 +96,7 @@ int main() {
     }
 
 salir_programa:
+//nueva linea de codigo aqui 
     // 5. Cerrar ncurses de forma segura
     endwin();
     return 0;
