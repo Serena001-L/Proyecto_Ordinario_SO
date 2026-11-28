@@ -98,7 +98,7 @@ int main() {
                 }
             }
         }
-
+ //Veroooooooooooooooooooooooo
         // Fase de Despacho y Ejecución (No Apropiativo)
         if (indice_sjf != -1) {
             // La CPU se bloquea por completo durante la ráfaga del proceso seleccionado
