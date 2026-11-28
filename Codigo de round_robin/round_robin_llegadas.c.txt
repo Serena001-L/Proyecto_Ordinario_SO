@@ -1,0 +1,97 @@
+#include <stdio.h>
+
+/* Mete a la cola de listos todos los procesos que ya llegaron (llegada <= tiempo)
+   y que todavia no han sido admitidos, en orden de llegada. */
+void revisar_llegadas(int tiempo, int n, int llegada[], int admitido[],
+                      int cola[], int *cabeza, int *cuenta) {
+    while (1) {
+        int mejor = -1;
+        for (int i = 0; i < n; i++) {
+            if (!admitido[i] && llegada[i] <= tiempo) {
+                if (mejor == -1 || llegada[i] < llegada[mejor])
+                    mejor = i;
+            }
+        }
+        if (mejor == -1)
+            break;
+        cola[(*cabeza + *cuenta) % n] = mejor;
+        (*cuenta)++;
+        admitido[mejor] = 1;
+    }
+}
+
+int main(void) {
+    int n, quantum;
+    int tiempo = 0, terminados = 0;
+    int cabeza = 0, cuenta = 0;     /* cola circular de procesos listos */
+    float prom_espera = 0, prom_retorno = 0;
+
+    printf("Ingresa el quantum: ");
+    scanf("%d", &quantum);
+    printf("Ingresa el numero de procesos: ");
+    scanf("%d", &n);
+
+    int llegada[n], rafaga[n], restante[n], espera[n], retorno[n];
+    int admitido[n], cola[n];
+
+    printf("Ingresa el tiempo de llegada de cada proceso: ");
+    for (int i = 0; i < n; i++)
+        scanf("%d", &llegada[i]);
+
+    printf("Ingresa la rafaga (tiempo de CPU) de cada proceso: ");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &rafaga[i]);
+        restante[i] = rafaga[i];
+        admitido[i] = 0;
+    }
+
+    printf("\nDiagrama de ejecucion:\n");
+
+    while (terminados < n) {
+        revisar_llegadas(tiempo, n, llegada, admitido, cola, &cabeza, &cuenta);
+
+        /* Si no hay nadie listo, la CPU esta ociosa: avanza el reloj */
+        if (cuenta == 0) {
+            tiempo++;
+            continue;
+        }
+
+        /* Saca el primer proceso de la cola */
+        int p = cola[cabeza];
+        cabeza = (cabeza + 1) % n;
+        cuenta--;
+
+        /* Ejecuta un quantum completo o lo que le quede */
+        int ejecucion = (restante[p] < quantum) ? restante[p] : quantum;
+        printf("  t=%2d -> t=%2d : P%d\n", tiempo, tiempo + ejecucion, p + 1);
+        tiempo += ejecucion;
+        restante[p] -= ejecucion;
+
+        /* Los que llegaron durante este quantum entran ANTES que p */
+        revisar_llegadas(tiempo, n, llegada, admitido, cola, &cabeza, &cuenta);
+
+        if (restante[p] > 0) {
+            /* No termino: vuelve al final de la cola */
+            cola[(cabeza + cuenta) % n] = p;
+            cuenta++;
+        } else {
+            /* Termino: calcula sus tiempos */
+            retorno[p] = tiempo - llegada[p];
+            espera[p] = retorno[p] - rafaga[p];
+            terminados++;
+        }
+    }
+
+    printf("\nProceso\tLlegada\tRafaga\tEspera\tRetorno\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\n", i + 1, llegada[i], rafaga[i],
+               espera[i], retorno[i]);
+        prom_espera += espera[i];
+        prom_retorno += retorno[i];
+    }
+
+    printf("\nEspera promedio:  %.2f\n", prom_espera / n);
+    printf("Retorno promedio: %.2f\n", prom_retorno / n);
+
+    return 0;
+}
