@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <string.h>
+#include <stdbool.h>
 
 int main() {
     // 1. Inicializar ncurses
@@ -18,11 +19,11 @@ int main() {
 
     // Definición de las opciones del menú
     const char* opciones[] = {
-        "1. PROCESOS",
-        "2. Estados de Procesos",
-        "3. PCB",
-        "4. Comunicación Interprocesos",
-        "5.Salir"
+        "1.- FCFS"
+        "2.- SJF"
+        "3.- Round-Robin"
+        "4.- SRTF"
+        "5.- Salir"
     };
     int total_opciones = 5;
     int seleccionada = 0; // Índice de la opción actualmente resaltada
